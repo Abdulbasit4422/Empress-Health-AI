@@ -3,10 +3,14 @@ import asyncio
 import nest_asyncio
 import streamlit as st
 from dotenv import load_dotenv
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, SystemMessagePromptTemplate, HumanMessagePromptTemplate
-from langchain.chains import LLMChain
-from langchain.memory import ChatMessageHistory, ConversationBufferMemory
+from langchain.schema.runnable import RunnableSequence
+from langchain_core.messages import HumanMessage, AIMessage
+from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain.memory import ConversationBufferMemory
 from pinecone import Pinecone
 
 # Apply nest_asyncio patch
@@ -14,6 +18,7 @@ nest_asyncio.apply()
 
 # Load environment variables
 load_dotenv()
+
 
 # Get API keys
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
@@ -43,9 +48,7 @@ Provide very brief accurate and helpful health response and Empress product reco
 
 def generate_response(question):
     """Generate a response using Pinecone retrieval and Gemini 2.0 Flash."""
-    # Create event loop for current thread
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+    
     
     # Embed the user's question
     query_embed = embed_model.embed_query(question)
@@ -54,7 +57,7 @@ def generate_response(question):
     # Query Pinecone for relevant documents - MODIFIED: top_k=3
     results = pinecone_index.query(
         vector=query_embed,
-        top_k=3,  # CHANGED from 2 to 3
+        top_k=5,  # CHANGED from 2 to 3
         include_values=False,
         include_metadata=True
     )
@@ -76,11 +79,13 @@ def generate_response(question):
     
     # Rebuild chat history from session state
     chat_history = ChatMessageHistory()
+    lc_chat_history = []
     for msg in st.session_state.chat_history:
-        if msg["role"] == "user":
-            chat_history.add_user_message(msg["content"])
-        elif msg["role"] == "assistant":
-            chat_history.add_ai_message(msg["content"])
+        for msg in st.session_state.chat_history:
+         if msg["role"] == "user":
+            lc_chat_history.append(HumanMessage(content=msg["content"]))
+         elif msg["role"] == "assistant":
+            lc_chat_history.append(AIMessage(content=msg["content"]))
     
     # Initialize memory with chat history
     memory = ConversationBufferMemory(
@@ -106,18 +111,16 @@ def generate_response(question):
     )
     
     # Create the conversation chain
-    conversation = LLMChain(
-        llm=chat,
-        prompt=prompt,
-        memory=memory,
-        verbose=True
-    )
+    conversation = RunnableSequence(prompt, chat)
     
     # Generate the response
-    res = conversation({"question": question})
-    
-    return res.get('text', '')
+    res = conversation.invoke({
+        "question": question,
+        "chat_history": lc_chat_history  # Pass the history here
+    }) # synchronous call
 
+    # safe extraction — adapt if your wrapper uses a different key
+    return res.content
 # Streamlit app layout remains unchanged
 st.title("Ask Empress")
 st.write("Ask your Post Menopausal Wellness questions and receive expert medical advice.")
@@ -134,7 +137,7 @@ for message in st.session_state.chat_history:
         st.markdown(message["content"])
 
 # Handle user input
-user_input = st.chat_input("Ask your health question:")
+user_input = st.chat_input("Type your message here....")
 if user_input:
     with st.chat_message("user"):
         st.markdown(user_input)
