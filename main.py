@@ -29,16 +29,16 @@ if not GOOGLE_API_KEY:
 
 # Initialize Pinecone and embedding model
 pc = Pinecone(api_key=PINECONE_API_KEY)
-pinecone_index = pc.Index("hiv")
+pinecone_index = pc.Index("empress")
 embed_model = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
 # Define system prompt template
 system_prompt_template = """
-Your name is HIV Health Guidance Chatbot. You are a health advisor specializing in HIV. Answer questions very very briefly and accurately. Use the following information to answer the user's question:
+Your name is Ask Empress Chatbot. You are a Post Menopausal Health and Wellness Expert. Answer questions very briefly and accurately. Use the following information to answer the user's question and recommend post menopausal wellness products based on user's questions:
 
 {doc_content}
 
-Provide very brief accurate and helpful health response based on the provided information and your expertise.
+Provide very brief accurate and helpful health response and Empress product recommendation based on the provided information and your expertise.
 """
 
 def generate_response(question):
@@ -101,7 +101,7 @@ def generate_response(question):
     # Initialize Gemini 2.0 Flash model with explicit client
     chat = ChatGoogleGenerativeAI(
         model="gemini-2.0-flash",
-        temperature=0.1,
+        temperature=0.3,
         google_api_key=GOOGLE_API_KEY
     )
     
@@ -119,13 +119,13 @@ def generate_response(question):
     return res.get('text', '')
 
 # Streamlit app layout remains unchanged
-st.title("HIV Health Guidance Assistant")
-st.write("Ask your HIV-related health questions and receive guidance based on our knowledge base.")
+st.title("Ask Empress")
+st.write("Ask your Post Menopausal Wellness questions and receive expert medical advice.")
 
 # Initialize chat history in session state
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
-        {"role": "assistant", "content": "Hello! I'm your HIV Health Guidance Assistant. How can I assist you today?"}
+        {"role": "assistant", "content": "Do you have questions about your perimenopause / menopause wellness? Ask me anything!"}
     ]
 
 # Display chat history

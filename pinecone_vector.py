@@ -17,12 +17,16 @@ def split_docs(documents, chunk_size=1500, chunk_overlap=100):
 # Load environment variables
 load_dotenv()
 
-# Initialize embeddings
-embed_model = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+# Pass it explicitly so it doesn’t try to use Google Cloud ADC
+embed_model = GoogleGenerativeAIEmbeddings(
+    model="models/embedding-001",
+    google_api_key=os.environ["GOOGLE_API_KEY"]
+)
+
 
 # Initialize Pinecone client
 pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
-index_name = 'hiv'
+index_name = 'empress'
 
 # Check if index exists; if not, create it
 existing_indexes = pc.list_indexes()
@@ -82,7 +86,7 @@ def concurrent_embed_documents(embed_model, documents, batch_size=100, max_worke
     return all_embeddings, all_contents
 
 # Load documents from PDF
-pdf_file_path = 'WHO_HIV.pdf'
+pdf_file_path = 'Empress.pdf'
 pdf_loader = PyPDFLoader(pdf_file_path)
 documents = pdf_loader.load()
 
