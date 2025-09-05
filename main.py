@@ -243,7 +243,19 @@ c1, c2, c3 = st.columns([1,1,1])
 with c1:
     st.markdown('<div class="card"><h3>OUR MISSION</h3><p class="small-muted">Empowering women through perimenopause & menopause with radiant, natural skincare.</p></div>', unsafe_allow_html=True)
 with c2:
-    st.markdown('<div class="card"><h3>ELIZABETH\\'S STORY</h3><p class="small-muted">Founder-led journey from hormonal imbalance to hormone-conscious care. <a href="#">Read more</a></p></div>, unsafe_allow_html=True)
+    st.markdown(
+    """
+    <div class="card">
+        <h3>ELIZABETH'S STORY</h3>
+        <p class="small-muted">
+            Founder-led journey from hormonal imbalance to hormone-conscious care. 
+            <a href="#">Read more</a>
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 with c3:
     st.markdown('<div class="card"><h3>EVERYDAY ESSENTIALS</h3><p class="small-muted">Curated serums and cleansers to support mature skin. <a href="#">Shop the Edit</a></p></div>', unsafe_allow_html=True)
 
