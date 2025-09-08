@@ -35,7 +35,7 @@ if not GOOGLE_API_KEY:
 
 # Initialize Pinecone and embedding model
 pc = Pinecone(api_key=PINECONE_API_KEY)
-pinecone_index = pc.Index("empress_merged")
+pinecone_index = pc.Index("empress-merged")
 embed_model = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
 # Define system prompt template
