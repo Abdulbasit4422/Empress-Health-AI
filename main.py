@@ -145,8 +145,8 @@ def generate_response(question):
     # safe extraction — adapt if your wrapper uses a different key
     return res.content
 # Streamlit app layout remains unchanged
-st.title("Ask Empress")
-st.write("Ask your Post Menopausal Wellness questions and receive expert medical advice.")
+st.title("Ask Empress Health")
+st.write("Ask your Peri+Menopausal Wellness questions and receive expert medical advice.")
 
 # Initialize chat history in session state
 if "chat_history" not in st.session_state:
